@@ -42,15 +42,15 @@ improper_n = Hash.new("");
 
 while (line = file.gets)
   line.strip!
-  if line == "ATOM    RES  RESNAME  NAME  TYPE   LJ Radius    LJ Depth      Mass    Charge GB Radius GB Screen"
+  if line == "ATOM    RES  RESNAME  NAME  TYPE   At.#   LJ Radius    LJ Depth      Mass    Charge GB Radius GB Screen"
     have_atom = true
-  elsif line == "Atom 1               Atom 2               R eq       Frc Cnst"
+  elsif line == "Atom 1              Atom 2       R eq   Frc Cnst"
     have_bond = true
-  elsif line == "Atom 1               Atom 2               Atom 3               Frc Cnst   Theta eq"
+  elsif line == "Atom 1               Atom 2               Atom 3   Frc Cnst   Theta eq"
     have_angle = true
-  elsif line == "Atom 1               Atom 2               Atom 3               Atom 4                Height     Periodic.  Phase      EEL Scale  VDW Scale"
+  elsif line == "Atom 1               Atom 2               Atom 3               Atom 4     Height  Periodic.      Phase  EEL Scale  VDW Scale"
     have_tors = true
-  else 
+  else
     # change brackets to spaces and then can split on whitespace
     line.gsub! "(", " "
     line.gsub! ")", " "
@@ -62,8 +62,8 @@ while (line = file.gets)
       else
         atom = tokens[4]
         atom_labels[atom]+=1
-        atom_sigma[atom] = tokens[5]
-        atom_epsilon[atom] = tokens[6]
+        atom_sigma[atom] = tokens[6]
+        atom_epsilon[atom] = tokens[7]
       end
     elsif (have_bond)
       if tokens[2].nil?
@@ -115,7 +115,7 @@ while (line = file.gets)
         tuple = tuple + " " + tokens[13]
         if have_improper
           improper_labels[tuple]+=1
-          if (tokens[14].to_f > 180.2) && (tokens[14].to_f < 179.8) 
+          if (tokens[14].to_f > 180.2) && (tokens[14].to_f < 179.8)
             puts "WARNING: improper torsion angle is not 180 degrees"
           end
 
@@ -124,7 +124,7 @@ while (line = file.gets)
             improper_phase[tuple] = tokens[14]
             improper_n[tuple] = tokens[13]
           elsif (improper_k[tuple] == tokens[12]) && (improper_phase[tuple] == tokens[14]) && (improper_n[tuple] == tokens[13])
-          else 
+          else
             puts "WARNING: %9s %8s %8s %8s" %  [tuple, improper_k[tuple], improper_phase[tuple], improper_n[tuple]]
             improper_k[tuple] = tokens[12]
             improper_phase[tuple] = tokens[14]
@@ -138,7 +138,7 @@ while (line = file.gets)
             tors_phase[tuple] = tokens[14]
             tors_n[tuple] = tokens[13]
           elsif (tors_k[tuple] == tokens[12]) && (tors_phase[tuple] == tokens[14]) && (tors_n[tuple] == tokens[13])
-          else 
+          else
             # kludge for multiple potentials for same torsion TODO fix!
             puts "WARNING: %9s %8s %8s %8s" %  [tuple, tokens[12], tokens[14], tokens[13]]
             puts "WARNING: %9s %8s %8s %8s" %  [tuple, tors_k[tuple], tors_phase[tuple], tors_n[tuple]]
@@ -238,4 +238,3 @@ improper_labels.each do|label,count|
   puts "%-2s %-2s %-2s %-2s %10.7f %9s %9s" % [equiv_table[tokens[0]], equiv_table[tokens[2]], equiv_table[tokens[1]], equiv_table[tokens[3]], k, improper_n[label], improper_phase[label]]
 end
 puts "#total GULP impropers %d" % [improper_total]
-
